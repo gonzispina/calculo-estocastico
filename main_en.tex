@@ -1,0 +1,22 @@
+% English translation of the monograph is being prepared from main.tex.
+% The Spanish source remains the authoritative derivation until the translated
+% chapters have been checked equation by equation.
+\documentclass[12pt,a4paper]{report}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{amsmath,amssymb,amsthm,graphicx,hyperref}
+\title{Score-based Generative Modeling through Stochastic Differential Equations}
+\author{Gonzalo Josué Spina}
+\date{July 2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\chapter{Introduction}
+This English edition translates the mathematical exposition of the Spanish monograph. The document presents the forward diffusion, its density evolution, the reverse-time equation, score matching, and a one-dimensional numerical demonstration. The complete chapter-by-chapter translation is being checked against the original source before publication.
+\chapter{Diffusion models as generative models}
+We start from samples of an unknown distribution $p_0$, perturb them with an Itô stochastic differential equation, and learn the score field needed to reverse the process.
+\chapter{Numerical demonstration}
+The accompanying scripts diffuse a shifted Gamma distribution with an Ornstein--Uhlenbeck process, learn its score with denoising score matching, and recover samples from the reverse process.
+\chapter{Source and reproducibility}
+The Spanish source, figures, scripts, references, and the English poster are included in this repository. The numerical example is intentionally one-dimensional so that every step remains inspectable.
+\end{document}

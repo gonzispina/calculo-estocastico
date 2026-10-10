@@ -1,6 +1,6 @@
 # Score-based generative modeling through stochastic differential equations
 
-This repository contains an English presentation of a course monograph on the mathematical foundations of score-based diffusion models.
+This repository contains a course monograph and an English presentation plan on the mathematical foundations of score-based diffusion models.
 
 The project follows one reproducible one-dimensional example:
 
@@ -15,9 +15,9 @@ The site version presents the poster as a sequence of short sections rather than
 ## Contents
 
 - `main.tex`: original Spanish monograph.
-- `main_en.tex`: English translation of the monograph.
+- `main_en.tex`: working scaffold for the English translation; the Spanish source remains authoritative while the chapter-by-chapter translation is checked.
 - `poster.tex`: original Spanish poster.
-- `poster_en.tex`: English poster.
+- `poster_en.tex`: English poster source.
 - `score_matching_demo.py`, `ou_trajectories.py`, `diffusion_3d.py`: numerical demonstrations and figure generation.
 - `references.bib`: bibliography.
 - `fig*.png`, `*_trajectories.png`, `score_matching_demo.png`: figures used by the documents.
@@ -41,4 +41,4 @@ This is a mathematical and computational exposition of the forward/reverse diffu
 
 ## Portfolio presentation
 
-The accompanying project page is published at [gonzalospina.com/projects/score-based-diffusions.html](https://gonzalospina.com/projects/score-based-diffusions.html). It develops the poster block by block and links back here for the source, code, and complete PDFs.
+The accompanying project page is published at [gonzalospina.com/projects/score-based-diffusions.html](https://gonzalospina.com/projects/score-based-diffusions.html). It develops the poster block by block and links back here for the source, code, and complete PDFs. The site currently links the original Spanish PDFs until the English PDFs are compiled and checked.
