@@ -37,8 +37,8 @@ We progressively corrupt observed samples with noise until reaching a known prio
 }
 \block{2. Diffusions as generative models}{
 The forward process is an Itô SDE:
-\[\dd X_t=f(X_t,t)\dd t+g(t)\dd B_t,\qquad X_0\sim p_0.\]
-For a suitable drift and noise schedule, $p_T$ approaches a tractable Gaussian prior. Anderson's time-reversal result adds the score to the reverse drift.
+\[\dd X_t=u(t,X_t)\dd t+\sigma(t,X_t)\dd B_t,\qquad X_0\sim p_0.\]
+For a suitable drift and diffusion coefficient, the process can be ergodic: for large $T$, $X_T$ forgets the initial distribution and $p_T$ approaches a tractable stationary prior. Anderson's time-reversal result then adds the score to the reverse drift.
 }
 \block{3. Forward process: Ornstein--Uhlenbeck}{
 \[\dd X_t=-X_t\dd t+\sigma\dd B_t.\]
