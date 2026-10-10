@@ -1,6 +1,7 @@
 % English poster companion to poster.tex.
 \documentclass[17pt,a1paper,portrait,margin=0mm,innermargin=12mm,
   blockverticalspace=8mm,colspace=10mm,titletotopverticalspace=2mm]{tikzposter}
+\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
 \usepackage{amsmath,amssymb,graphicx,tikz}
@@ -42,7 +43,7 @@ For a suitable drift and noise schedule, $p_T$ approaches a tractable Gaussian p
 \block{3. Forward process: Ornstein--Uhlenbeck}{
 \[\dd X_t=-X_t\dd t+\sigma\dd B_t.\]
 The stable drift contracts the process while Brownian noise spreads mass. For large $T$, $p_T\approx\mathcal N(0,\sigma^2/2)$.
-\begin{center}\includegraphics[width=.97\linewidth]{fig1_forward.png}\end{center}}
+\begin{center}\includegraphics[width=.97\linewidth]{ou_trajectories_en.png}\end{center}}
 \column{0.43}
 \block{4. Anderson (1982): reverse time}{
 \[\dd\hat X_\tau=\left[\hat X_\tau+\sigma^2\,\color{accentred}{\nabla_x\log p_{T-\tau}}\right]\dd\tau+\sigma\dd\bar B_\tau.\]
