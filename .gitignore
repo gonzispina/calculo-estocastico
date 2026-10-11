@@ -1,4 +1,6 @@
 build/
+venv/
+.DS_Store
 *.aux
 *.bbl
 *.bcf
