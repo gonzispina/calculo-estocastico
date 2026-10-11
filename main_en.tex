@@ -1,22 +1,76 @@
-% English translation of the monograph is being prepared from main.tex.
-% The Spanish source remains the authoritative derivation until the translated
-% chapters have been checked equation by equation.
+% English monograph: score-based generative modeling through SDEs.
 \documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
-\usepackage{amsmath,amssymb,amsthm,graphicx,hyperref}
-\title{Score-based Generative Modeling through Stochastic Differential Equations}
-\author{Gonzalo Josué Spina}
-\date{July 2026}
+\usepackage{lmodern,microtype}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{graphicx,float,booktabs}
+\usepackage[colorlinks=true,linkcolor=blue!60!black,citecolor=green!50!black,urlcolor=blue]{hyperref}
+\usepackage[backend=biber,style=alphabetic,sorting=nyt]{biblatex}
+\addbibresource{references.bib}
+\usepackage[top=2cm,bottom=2.5cm,left=2.5cm,right=2.5cm]{geometry}
+\usepackage{fancyhdr}
+\pagestyle{fancy}\fancyhf{}\fancyhead[R]{\thepage}\fancyhead[L]{\nouppercase{\leftmark}}
+\newcommand{\R}{\mathbb{R}}\newcommand{\E}{\mathbb{E}}\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\theoremstyle{plain}\newtheorem{theorem}{Theorem}[chapter]\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}\newtheorem{definition}[theorem]{Definition}\newtheorem{example}{Example}[chapter]
+\graphicspath{{./}{../}}
 \begin{document}
-\maketitle
-\tableofcontents
+\begin{titlepage}\centering\vspace*{2cm}{\Large University of Buenos Aires\par}\vspace{.5cm}{\large Faculty of Exact and Natural Sciences\par}{\large Stochastic Calculus\par}\vspace{3cm}{\Huge\bfseries Score-based generative modeling through stochastic differential equations\par}\vspace{2cm}{\large Author: Gonzalo Josué Spina\par}\vfill{\large July 2026\par}\end{titlepage}
+\tableofcontents\clearpage
 \chapter{Introduction}
-This English edition translates the mathematical exposition of the Spanish monograph. The document presents the forward diffusion, its density evolution, the reverse-time equation, score matching, and a one-dimensional numerical demonstration. The complete chapter-by-chapter translation is being checked against the original source before publication.
-\chapter{Diffusion models as generative models}
-We start from samples of an unknown distribution $p_0$, perturb them with an Itô stochastic differential equation, and learn the score field needed to reverse the process.
-\chapter{Numerical demonstration}
-The accompanying scripts diffuse a shifted Gamma distribution with an Ornstein--Uhlenbeck process, learn its score with denoising score matching, and recover samples from the reverse process.
-\chapter{Source and reproducibility}
-The Spanish source, figures, scripts, references, and the English poster are included in this repository. The numerical example is intentionally one-dimensional so that every step remains inspectable.
+Generative modeling starts from a finite collection of observations and asks for an approximation of the unknown distribution that produced them. If the approximation is useful, it should allow us to draw new samples with the same statistical structure as the data.
+
+Diffusion models solve this problem indirectly. A forward stochastic process gradually corrupts samples from an unknown distribution $p_0$ until, at a sufficiently large time $T$, the state is close to a simple stationary distribution that can be sampled directly. The generative model then runs a learned reverse process from that prior back toward $p_0$.
+
+This monograph develops the mathematical ingredients of that construction: Itô diffusions, density evolution, time reversal, the score, and score matching. The numerical example uses a shifted Gamma distribution as $p_0$ and an Ornstein--Uhlenbeck process as the forward diffusion, so that every step can be visualized and reproduced.
+\chapter{Diffusion processes}
+A diffusion is a Markov process $X_t\in\R^d$ satisfying
+\begin{equation}\label{eq:sde}\dd X_t=u(t,X_t)\dd t+\sigma(t,X_t)\dd B_t,\qquad X_0=Z,\end{equation}
+where $B_t$ is an $m$-dimensional Brownian motion, $u$ is the drift and $\sigma$ is the diffusion coefficient. Equivalently,
+\begin{equation}\label{eq:sde-integral}X_t=Z+\int_0^t u(s,X_s)\dd s+\int_0^t\sigma(s,X_s)\dd B_s.\end{equation}
+Under global Lipschitz and linear-growth conditions on $u$ and $\sigma$, the SDE has a unique strong solution. The drift describes the local deterministic tendency, whereas $\sigma\dd B_t$ injects random fluctuations.
+\begin{definition}[Infinitesimal generator]
+For a Markov diffusion, the infinitesimal generator is $\mathcal A_t f(x)=\lim_{h\downarrow0}(\E^x[f(X_{t+h})]-f(x))/h$. Itô's formula gives
+\begin{equation}\label{eq:generator}\mathcal A_t f(x)=u_i(t,x)\partial_i f(x)+\frac12(\sigma\sigma^\top)_{ij}(t,x)\partial_{ij}f(x).\end{equation}
+\end{definition}
+If $p(t,x)$ is the density of $X_t$, the adjoint generator yields the Fokker--Planck equation
+\begin{equation}\label{eq:fp}\partial_t p=-\partial_i(u_i p)+\frac12\partial_{ij}\bigl((\sigma\sigma^\top)_{ij}p\bigr).\end{equation}
+\begin{example}[Ornstein--Uhlenbeck diffusion]
+The one-dimensional OU process is
+\begin{equation}\label{eq:ou}\dd X_t=-X_t\dd t+\sigma\dd B_t,\qquad X_0\sim p_0.\end{equation}
+Conditioned on $X_0=x_0$, $X_t\mid x_0\sim\mathcal N(x_0e^{-t},\frac{\sigma^2}{2}(1-e^{-2t}))$. Its stable drift gives the stationary distribution $\pi=\mathcal N(0,\sigma^2/2)$. For large enough $T$, the process is ergodic and $p_T$ is effectively independent of $p_0$.
+\end{example}
+\begin{figure}[H]\centering\includegraphics[width=\textwidth]{ou_trajectories_en.png}\caption{OU trajectories and conditional density evolution toward the stationary Gaussian.}\label{fig:ou}\end{figure}
+\chapter{Reverse-time diffusion}
+The forward process maps $p_0$ to $p_T$. To generate data, we need a process that runs in the opposite direction. Define $\hat X_t=X_{T-t}$. Under regularity and positivity assumptions, the reversed process is itself a diffusion.
+\begin{theorem}[Time reversal, Anderson]
+Let $a=\sigma\sigma^\top$. The reversed process satisfies
+\begin{equation}\label{eq:reverse-sde}\dd\hat X_t=\hat u(t,\hat X_t)\dd t+\hat\sigma(t,\hat X_t)\dd\hat B_t,\end{equation}
+with $\hat\sigma(t,x)=\sigma(T-t,x)$ and
+\begin{equation}\label{eq:reverse-drift}\hat u^i(t,x)=-u^i(T-t,x)+\frac{1}{p(T-t,x)}\partial_j\bigl[a^{ij}(T-t,x)p(T-t,x)\bigr].\end{equation}
+\end{theorem}
+When $\sigma=\sigma(t)$ is spatially constant, the derivative of $a$ vanishes and
+\begin{equation}\label{eq:reverse-score-form}\hat u(t,x)=-u(T-t,x)+\sigma(T-t)^2\nabla_x\log p(T-t,x).\end{equation}
+\chapter{The score and score matching}
+\begin{definition}[Score]
+For a density $p_t$, the score is $s(t,x)=\nabla_x\log p_t(x)$. It is exactly the unknown term in the reverse drift.
+\end{definition}
+\begin{figure}[H]\centering\includegraphics[width=\textwidth]{fig2_score.png}\caption{The score field along the forward path. Arrows point toward higher-density regions; the picture can be read from left to right as diffusion or from right to left as reverse guidance.}\label{fig:score}\end{figure}
+Hyvärinen's score-matching result shows that the score can be learned without evaluating the normalized density. For a model $s_\theta$, integration by parts gives
+\begin{equation}\label{eq:sm}J_{SM}(\theta)=\E_{p_t}\left[\operatorname{tr}(\nabla_xs_\theta(x,t))+\frac12\norm{s_\theta(x,t)}^2\right]+\mathrm{const}.\end{equation}
+In the denoising formulation, a clean sample $x$ is corrupted with a known kernel $q_t(\tilde x\mid x)$. For Gaussian corruption,
+\begin{equation}\label{eq:conditional-score}\nabla_{\tilde x}\log q_t(\tilde x\mid x)=-\frac{\tilde x-x}{\sigma_t^2}.\end{equation}
+The network is trained over a discrete time grid $0<t_1<\cdots<t_K\le T$ using
+\begin{equation}\label{eq:dsm}L(\theta)=\frac1K\sum_{k=1}^K\E\left[\norm{s_\theta(\tilde x,t_k)+\frac{\tilde x-x}{\sigma_{t_k}^2}}^2\right].\end{equation}
+\chapter{Score-based generation}
+Once $s_\theta$ is trained, it is substituted into the reverse drift and integrated numerically. We sample $x_T\sim\pi$, step backward with Euler--Maruyama, and return the resulting $x_0$ as an approximate sample from $p_0$:
+\begin{equation}\label{eq:em}x_{t_{k-1}}=x_{t_k}+[-u(t_k,x_{t_k})+\sigma(t_k)^2s_\theta(t_k,x_{t_k})]\Delta t+\sigma(t_k)\sqrt{\Delta t}\,z_k.\end{equation}
+\begin{enumerate}\item Sample $x_T$ from the stationary prior.\item For $k=N,\ldots,1$, apply~\eqref{eq:em} with $z_k\sim\mathcal N(0,I)$.\item Return $x_0$.\end{enumerate}
+\begin{figure}[H]\centering\includegraphics[width=\textwidth]{score_matching_demo.png}\caption{Reference samples from the shifted Gamma distribution and samples generated by the learned reverse process. The Kolmogorov--Smirnov test gives $p=0.69$.}\label{fig:demo}\end{figure}
+\chapter{Numerical experiment}
+We choose a Gamma distribution shifted to have mean zero, run the OU forward process with $\sigma=1$ until $T=5$, and train a small neural network by denoising score matching. The reverse SDE starts from the stationary Gaussian prior. The generated histogram reproduces the reference distribution in this one-dimensional test; it is an inspectable sanity check of the full pipeline, not an image-generation benchmark.
+\printbibliography[heading=bibintoc,title={References}]
 \end{document}
